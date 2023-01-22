@@ -95,7 +95,7 @@ to create character portraits and write character descriptions so that other pla
 with them. This information need not be represented on-chain as it does not affect the game's mechanics,
 only its social interactions.
 
-As we described earlier, the owner of a character will have complete authority on setting the metadata.
+As described earlier, the owner of a character will have complete authority on setting the metadata.
 The Great Wyrm character contract will not impose any restrictions on *where* this data can be stored
 and it will not impose a restriction that the storage mechanism should be decentralized. We suggest to
 anyone developing a game client that they build a reasonable default for tokens which do not have valid
@@ -104,7 +104,7 @@ metadata URIs.
 We also foresee services springing up which make it easy for players to create and store their character
 sheets. We welcome this, as this is what decentralized gaming stands for!
 
-The only restriction we impose on players is that the metadata they set for their characters be released
+The only restriction imposed on players is that the metadata they set for their characters be released
 under the [CC0 Creative Commons License](https://creativecommons.org/share-your-work/public-domain/cc0/).
 This will ensure that the Great Wyrm community can build the game world without having to worry about
 lawsuits tainting the magic of our shared creation.
