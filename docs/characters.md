@@ -90,7 +90,7 @@ are permanent for each character.
 ## Metadata and CC0
 
 Despite the hard requirement to represent character attributes on-chain, there are certain aspects to
-Great Wyrm character that do not make sense to store on-chain. For example, players will have the ability
+Great Wyrm characters that do not make sense to store on-chain. For example, players will have the ability
 to create character portraits and write character descriptions so that other players know how to interact
 with them. This information need not be represented on-chain as it does not affect the game's mechanics,
 only its social interactions.
