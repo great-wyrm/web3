@@ -48,8 +48,8 @@ Wyrm without requiring tedious cross-contract migrations.
 The authority of the contract deployer can be mitigated in the future by transferring ownership of
 the contract from the original deployer(s) to a community-controlled account (e.g. a multisig contract).
 
-We have chosen EIP-2535 because Moonstream, which initiated this project, has extensive production experience
-managing EIP-2535 proxy contracts on mainnets.
+One reason we have chosen EIP-2535 is that Moonstream, which initiated this project, has extensive
+experience managing EIP-2535 proxy contracts on mainnets.
 
 ## Eras and origins
 
