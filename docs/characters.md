@@ -109,6 +109,7 @@ under the [CC0 Creative Commons License](https://creativecommons.org/share-your-
 This will ensure that the Great Wyrm community can build the game world without having to worry about
 lawsuits tainting the magic of our shared creation.
 
-We will denote agreement to this condition on a separate smart contract, and the Great Wyrm character
-contract will check that an account has agreed to these terms from that contract whenever that account
-attempts to change character metadata.
+The method that players use to set metadata URIs on the Great Wyrm character contract will take a boolean
+argument (`cc0Consent`) that they have to explicitly set to `true` else the transaction will fail. This
+is how we will represent players' consent to release their content to the Great Wyrm community under
+CC0.
