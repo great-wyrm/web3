@@ -69,7 +69,11 @@ class CharactersTestCase(unittest.TestCase):
         )
 
         # Approve Characters contract for the character creation Terminus pool.
-        cls.terminus.approve_for_pool(cls.character_creation_terminus_pool_id, cls.characters.address, cls.owner_tx_config)
+        cls.terminus.approve_for_pool(
+            cls.character_creation_terminus_pool_id,
+            cls.characters.address,
+            cls.owner_tx_config,
+        )
 
 
 class CharactersSetupTests(CharactersTestCase):
@@ -169,20 +173,145 @@ class CharacterCreationTests(CharactersTestCase):
             self.player.address, self.character_creation_terminus_pool_id
         )
         player_character_balance_0 = self.characters.balance_of(self.player.address)
-        random_person_character_balance_0 = self.characters.balance_of(self.random_person.address)
+        random_person_character_balance_0 = self.characters.balance_of(
+            self.random_person.address
+        )
 
-        self.characters.create_character(self.random_person.address, {"from": self.player})
+        self.characters.create_character(
+            self.random_person.address, {"from": self.player}
+        )
 
         total_supply_1 = self.characters.total_supply()
         character_creation_token_balance_1 = self.terminus.balance_of(
             self.player.address, self.character_creation_terminus_pool_id
         )
         player_character_balance_1 = self.characters.balance_of(self.player.address)
-        random_person_character_balance_1 = self.characters.balance_of(self.random_person.address)
+        random_person_character_balance_1 = self.characters.balance_of(
+            self.random_person.address
+        )
 
         self.assertEqual(total_supply_1, total_supply_0 + 1)
         self.assertEqual(
             character_creation_token_balance_1, character_creation_token_balance_0 - 1
         )
         self.assertEqual(player_character_balance_1, player_character_balance_0)
-        self.assertEqual(random_person_character_balance_1, random_person_character_balance_0 + 1)
+        self.assertEqual(
+            random_person_character_balance_1, random_person_character_balance_0 + 1
+        )
+
+
+class TestCharacterProfiles(CharactersTestCase):
+    def setUp(self):
+        self.terminus.mint(
+            self.player.address,
+            self.character_creation_terminus_pool_id,
+            2,
+            "",
+            self.owner_tx_config,
+        )
+        self.characters.create_character(self.player.address, {"from": self.player})
+        self.token_id = self.characters.total_supply()
+
+    def test_player_can_change_character_metadata(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+        profile_uri = f"https://example.com/characters/{self.token_id}/profile.json"
+        self.characters.set_token_uri(
+            self.token_id, profile_uri, True, {"from": self.player}
+        )
+
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), profile_uri)
+
+    def test_player_cannot_change_character_metadata_if_they_do_not_agree_to_license_terms(
+        self,
+    ):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+        profile_uri = f"https://example.com/characters/{self.token_id}/profile.json"
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_token_uri(
+                self.token_id, profile_uri, False, {"from": self.player}
+            )
+
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+    def test_admin_cannot_change_player_character_metadata(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+        profile_uri = f"https://example.com/characters/{self.token_id}/profile.json"
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_token_uri(
+                self.token_id, profile_uri, False, {"from": self.admin}
+            )
+
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+    def test_admin_can_approve_profile(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.characters.set_metadata_validity(self.token_id, True, {"from": self.admin})
+        self.assertTrue(self.characters.is_metadata_valid(self.token_id))
+
+    def test_player_cannot_approve_profile(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_metadata_validity(
+                self.token_id, True, {"from": self.player}
+            )
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+
+    def test_admin_can_approve_then_unapprove_profile(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.characters.set_metadata_validity(self.token_id, True, {"from": self.admin})
+        self.assertTrue(self.characters.is_metadata_valid(self.token_id))
+        self.characters.set_metadata_validity(
+            self.token_id, False, {"from": self.admin}
+        )
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+
+    def test_random_person_cannot_change_player_character_metadata(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+        profile_uri = f"https://example.com/characters/{self.token_id}/profile.json"
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_token_uri(
+                self.token_id, profile_uri, False, {"from": self.random_person}
+            )
+
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+    def test_contract_owner_cannot_change_player_character_metadata(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+        profile_uri = f"https://example.com/characters/{self.token_id}/profile.json"
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_token_uri(
+                self.token_id, profile_uri, False, {"from": self.owner}
+            )
+
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        self.assertEqual(self.characters.token_uri(self.token_id), "")
+
+    def test_random_person_cannot_change_profile_validity(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_metadata_validity(
+                self.token_id, True, {"from": self.random_person}
+            )
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+
+    def test_contract_owner_cannot_change_profile_validity(self):
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
+        with self.assertRaises(VirtualMachineError):
+            self.characters.set_metadata_validity(
+                self.token_id, True, {"from": self.owner}
+            )
+        self.assertFalse(self.characters.is_metadata_valid(self.token_id))
