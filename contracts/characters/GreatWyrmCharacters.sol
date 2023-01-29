@@ -97,6 +97,10 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         emit InventorySet(inventoryAddress);
     }
 
+    function inventory() external view returns (address) {
+        return LibCharacters.charactersStorage().InventoryAddress;
+    }
+
     function setContractInformation(string calldata contractName, string calldata contractSymbol, string calldata contractUri) external {
         LibDiamond.enforceIsContractOwner();
 

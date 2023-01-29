@@ -25,11 +25,14 @@ IMPORTANT_CONTRACTS=( \
     "Diamond" \
     "DiamondCutFacet" \
     "DiamondLoupeFacet" \
+    "MockERC20" \
     "MockTerminus" \
     "OwnershipFacet" \
 )
 
 cd $SCRIPT_DIR
+
+brownie compile
 
 for contract_name in "${IMPORTANT_CONTRACTS[@]}"
 do

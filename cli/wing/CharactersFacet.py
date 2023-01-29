@@ -137,6 +137,10 @@ class CharactersFacet:
             transaction_config,
         )
 
+    def inventory(self, block_number: Optional[Union[str, int]] = "latest") -> Any:
+        self.assert_contract_is_instantiated()
+        return self.contract.inventory.call(block_identifier=block_number)
+
     def is_approved_for_all(
         self,
         account: ChecksumAddress,
@@ -417,6 +421,13 @@ def handle_init(args: argparse.Namespace) -> None:
         print(result.info())
 
 
+def handle_inventory(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    contract = CharactersFacet(args.address)
+    result = contract.inventory(block_number=args.block_number)
+    print(result)
+
+
 def handle_is_approved_for_all(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = CharactersFacet(args.address)
@@ -679,6 +690,10 @@ def generate_cli() -> argparse.ArgumentParser:
         "--contract-uri", required=True, help="Type: string", type=str
     )
     init_parser.set_defaults(func=handle_init)
+
+    inventory_parser = subcommands.add_parser("inventory")
+    add_default_arguments(inventory_parser, False)
+    inventory_parser.set_defaults(func=handle_inventory)
 
     is_approved_for_all_parser = subcommands.add_parser("is-approved-for-all")
     add_default_arguments(is_approved_for_all_parser, False)
