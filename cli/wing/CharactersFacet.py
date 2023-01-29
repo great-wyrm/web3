@@ -110,6 +110,10 @@ class CharactersFacet:
         self.assert_contract_is_instantiated()
         return self.contract.balanceOf.call(account, block_identifier=block_number)
 
+    def contract_uri(self, block_number: Optional[Union[str, int]] = "latest") -> Any:
+        self.assert_contract_is_instantiated()
+        return self.contract.contractURI.call(block_identifier=block_number)
+
     def get_approved(
         self, token_id: int, block_number: Optional[Union[str, int]] = "latest"
     ) -> Any:
@@ -394,6 +398,13 @@ def handle_balance_of(args: argparse.Namespace) -> None:
     print(result)
 
 
+def handle_contract_uri(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    contract = CharactersFacet(args.address)
+    result = contract.contract_uri(block_number=args.block_number)
+    print(result)
+
+
 def handle_get_approved(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = CharactersFacet(args.address)
@@ -658,6 +669,10 @@ def generate_cli() -> argparse.ArgumentParser:
     add_default_arguments(balance_of_parser, False)
     balance_of_parser.add_argument("--account", required=True, help="Type: address")
     balance_of_parser.set_defaults(func=handle_balance_of)
+
+    contract_uri_parser = subcommands.add_parser("contract-uri")
+    add_default_arguments(contract_uri_parser, False)
+    contract_uri_parser.set_defaults(func=handle_contract_uri)
 
     get_approved_parser = subcommands.add_parser("get-approved")
     add_default_arguments(get_approved_parser, False)

@@ -120,6 +120,10 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         return LibCharacters.charactersStorage().ContractSymbol;
     }
 
+    function contractURI() external view returns (string memory) {
+        return LibCharacters.charactersStorage().ContractURI;
+    }
+
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         return LibCharacters.charactersStorage().TokenURIs[tokenId];
     }

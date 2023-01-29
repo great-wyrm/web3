@@ -5,7 +5,7 @@ from brownie.exceptions import VirtualMachineError
 from brownie.network import chain
 from moonworm.watch import _fetch_events_chunk
 
-from . import CharactersFacet, MockERC20, MockTerminus
+from . import characters_events, CharactersFacet, MockERC20, MockTerminus
 from .core import characters_gogogo
 
 MAX_UINT = 2**256 - 1
@@ -40,7 +40,7 @@ class CharactersTestCase(unittest.TestCase):
 
         cls.terminus.create_pool_v1(1, False, True, cls.owner_tx_config)
         cls.admin_terminus_pool_id = cls.terminus.total_pools()
-        cls.terminus.create_pool_v1(1, True, True, cls.owner_tx_config)
+        cls.terminus.create_pool_v1(MAX_UINT, True, True, cls.owner_tx_config)
         cls.character_creation_terminus_pool_id = cls.terminus.total_pools()
 
         # Mint admin badge to administrator account
@@ -51,23 +51,37 @@ class CharactersTestCase(unittest.TestCase):
         # Mint character creation badges to player account
         cls.terminus.mint(cls.player.address, cls.character_creation_terminus_pool_id, 10, "", cls.owner_tx_config)
 
+        cls.contract_name = "Great Wyrm Test Characters"
+        cls.contract_symbol = "WYRMTEST"
+        cls.contract_uri = "https://example.com"
+
         cls.predeployment_block = len(chain)
         cls.deployed_contracts = characters_gogogo(
             cls.terminus.address,
             cls.admin_terminus_pool_id,
             cls.character_creation_terminus_pool_id,
-            "Great Wyrm Test Characters",
-            "WYRMTEST",
-            "https://example.com",
-            cls.nft.address,
+            cls.contract_name,
+            cls.contract_symbol,
+            cls.contract_uri,
             cls.owner_tx_config,
         )
         cls.postdeployment_block = len(chain)
-        cls.inventory = CharactersFacet.CharactersFacet(
+        cls.characters = CharactersFacet.CharactersFacet(
             cls.deployed_contracts["contracts"]["Diamond"]
         )
 
 
 class CharactersSetupTests(CharactersTestCase):
     def test_characters_setup(self):
-        pass
+        current_block = len(chain)
+        contract_information_set_events = _fetch_events_chunk(web3_client, characters_events.CONTRACT_INFORMATION_SET, 0, current_block, self.characters.address)
+        self.assertEqual(len(contract_information_set_events), 1)
+        event = contract_information_set_events[0]
+        self.assertEqual(event["event"], "ContractInformationSet")
+        self.assertEqual(event["args"]["name"], self.contract_name)
+        self.assertEqual(event["args"]["symbol"], self.contract_symbol)
+        self.assertEqual(event["args"]["uri"], self.contract_uri)
+
+        self.assertEqual(self.characters.name(), self.contract_name)
+        self.assertEqual(self.characters.symbol(), self.contract_symbol)
+        self.assertEqual(self.characters.contract_uri(), self.contract_uri)

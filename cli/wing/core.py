@@ -45,7 +45,7 @@ FACET_PRECEDENCE: List[str] = [
 
 
 class WingFeatures(Enum):
-    Characters = "CharactersFacet"
+    CHARACTERS = "CharactersFacet"
 
 
 def feature_from_facet_name(facet_name: str) -> Optional[WingFeatures]:
@@ -287,6 +287,7 @@ def characters_gogogo(
     character_creation_terminus_pool_id: int,
     contract_name: str,
     contract_symbol: str,
+    contract_uri: str,
     transaction_config: Dict[str, Any],
     diamond_cut_address: Optional[str] = None,
     diamond_address: Optional[str] = None,
@@ -295,7 +296,7 @@ def characters_gogogo(
     characters_facet_address: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Deploys an EIP2535 Diamond contract and an CharactersFacet and mounts the InventoryFacet onto the Diamond contract.
+    Deploys an EIP2535 Diamond contract and an CharactersFacet and mounts the CharactersFacet onto the Diamond contract.
 
     Returns the addresses and attachments.
     """
@@ -309,10 +310,10 @@ def characters_gogogo(
     )
 
     if characters_facet_address is None:
-        characters_facet = CharactersFacet.InventoryFacet(None)
+        characters_facet = CharactersFacet.CharactersFacet(None)
         characters_facet.deploy(transaction_config=transaction_config)
     else:
-        characters_facet = CharactersFacet.InventoryFacet(characters_facet_address)
+        characters_facet = CharactersFacet.CharactersFacet(characters_facet_address)
 
     deployment_info["contracts"]["CharactersFacet"] = characters_facet.address
 
@@ -329,7 +330,8 @@ def characters_gogogo(
             admin_terminus_pool_id,
             character_creation_terminus_pool_id,
             contract_name,
-            contract_symbol
+            contract_symbol,
+            contract_uri,
         ],
     )
     deployment_info["attached"].append("CharactersFacet")
