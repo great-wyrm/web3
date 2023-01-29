@@ -123,6 +123,7 @@ class CharactersFacet:
         character_creation_terminus_pool_id: int,
         contract_name: str,
         contract_symbol: str,
+        contract_uri: str,
         transaction_config,
     ) -> Any:
         self.assert_contract_is_instantiated()
@@ -132,6 +133,7 @@ class CharactersFacet:
             character_creation_terminus_pool_id,
             contract_name,
             contract_symbol,
+            contract_uri,
             transaction_config,
         )
 
@@ -146,11 +148,11 @@ class CharactersFacet:
             account, operator, block_identifier=block_number
         )
 
-    def is_metadata_invalid(
+    def is_metadata_valid(
         self, token_id: int, block_number: Optional[Union[str, int]] = "latest"
     ) -> Any:
         self.assert_contract_is_instantiated()
-        return self.contract.isMetadataInvalid.call(
+        return self.contract.isMetadataValid.call(
             token_id, block_identifier=block_number
         )
 
@@ -196,6 +198,18 @@ class CharactersFacet:
     ) -> Any:
         self.assert_contract_is_instantiated()
         return self.contract.setApprovalForAll(operator, status, transaction_config)
+
+    def set_contract_information(
+        self,
+        contract_name: str,
+        contract_symbol: str,
+        contract_uri: str,
+        transaction_config,
+    ) -> Any:
+        self.assert_contract_is_instantiated()
+        return self.contract.setContractInformation(
+            contract_name, contract_symbol, contract_uri, transaction_config
+        )
 
     def set_inventory(
         self, inventory_address: ChecksumAddress, transaction_config
@@ -395,6 +409,7 @@ def handle_init(args: argparse.Namespace) -> None:
         character_creation_terminus_pool_id=args.character_creation_terminus_pool_id,
         contract_name=args.contract_name,
         contract_symbol=args.contract_symbol,
+        contract_uri=args.contract_uri,
         transaction_config=transaction_config,
     )
     print(result)
@@ -411,10 +426,10 @@ def handle_is_approved_for_all(args: argparse.Namespace) -> None:
     print(result)
 
 
-def handle_is_metadata_invalid(args: argparse.Namespace) -> None:
+def handle_is_metadata_valid(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = CharactersFacet(args.address)
-    result = contract.is_metadata_invalid(
+    result = contract.is_metadata_valid(
         token_id=args.token_id, block_number=args.block_number
     )
     print(result)
@@ -482,6 +497,21 @@ def handle_set_approval_for_all(args: argparse.Namespace) -> None:
     result = contract.set_approval_for_all(
         operator=args.operator,
         status=args.status,
+        transaction_config=transaction_config,
+    )
+    print(result)
+    if args.verbose:
+        print(result.info())
+
+
+def handle_set_contract_information(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    contract = CharactersFacet(args.address)
+    transaction_config = get_transaction_config(args)
+    result = contract.set_contract_information(
+        contract_name=args.contract_name,
+        contract_symbol=args.contract_symbol,
+        contract_uri=args.contract_uri,
         transaction_config=transaction_config,
     )
     print(result)
@@ -645,6 +675,9 @@ def generate_cli() -> argparse.ArgumentParser:
     init_parser.add_argument(
         "--contract-symbol", required=True, help="Type: string", type=str
     )
+    init_parser.add_argument(
+        "--contract-uri", required=True, help="Type: string", type=str
+    )
     init_parser.set_defaults(func=handle_init)
 
     is_approved_for_all_parser = subcommands.add_parser("is-approved-for-all")
@@ -657,12 +690,12 @@ def generate_cli() -> argparse.ArgumentParser:
     )
     is_approved_for_all_parser.set_defaults(func=handle_is_approved_for_all)
 
-    is_metadata_invalid_parser = subcommands.add_parser("is-metadata-invalid")
-    add_default_arguments(is_metadata_invalid_parser, False)
-    is_metadata_invalid_parser.add_argument(
+    is_metadata_valid_parser = subcommands.add_parser("is-metadata-valid")
+    add_default_arguments(is_metadata_valid_parser, False)
+    is_metadata_valid_parser.add_argument(
         "--token-id", required=True, help="Type: uint256", type=int
     )
-    is_metadata_invalid_parser.set_defaults(func=handle_is_metadata_invalid)
+    is_metadata_valid_parser.set_defaults(func=handle_is_metadata_valid)
 
     mint_parser = subcommands.add_parser("mint")
     add_default_arguments(mint_parser, True)
@@ -726,6 +759,19 @@ def generate_cli() -> argparse.ArgumentParser:
         "--status", required=True, help="Type: bool", type=boolean_argument_type
     )
     set_approval_for_all_parser.set_defaults(func=handle_set_approval_for_all)
+
+    set_contract_information_parser = subcommands.add_parser("set-contract-information")
+    add_default_arguments(set_contract_information_parser, True)
+    set_contract_information_parser.add_argument(
+        "--contract-name", required=True, help="Type: string", type=str
+    )
+    set_contract_information_parser.add_argument(
+        "--contract-symbol", required=True, help="Type: string", type=str
+    )
+    set_contract_information_parser.add_argument(
+        "--contract-uri", required=True, help="Type: string", type=str
+    )
+    set_contract_information_parser.set_defaults(func=handle_set_contract_information)
 
     set_inventory_parser = subcommands.add_parser("set-inventory")
     add_default_arguments(set_inventory_parser, True)

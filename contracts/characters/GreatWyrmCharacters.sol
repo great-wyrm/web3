@@ -15,8 +15,7 @@ import {ITerminus} from "../interfaces/ITerminus.sol";
 
 library LibCharacters {
     bytes32 constant CHARACTER_METADATA_STORAGE_POSITION =
-        keccak256("great-wyrm.characters.metadata");
-
+        keccak256("great-wyrm.characters.storage");
 
     struct CharactersStorage {
         address InventoryAddress;
@@ -25,11 +24,12 @@ library LibCharacters {
         uint256 CharacterCreationTerminusPoolID;
         string ContractName;
         string ContractSymbol;
+        string ContractURI;
         // TokenID => string storing the token URI for each character
         mapping(uint256 => string) TokenURIs;
         // Token ID => bool describing whether or not the metadata for the character represented by that
         // token ID is licensed appopriately.
-        mapping(uint256 => bool) MetadataInvalid;
+        mapping(uint256 => bool) MetadataValid;
     }
 
     function charactersStorage()
@@ -49,6 +49,7 @@ CharactersFacet contains all the characters in the universe of Great Wyrm.
  */
 contract CharactersFacet is ERC721Base, ERC721Enumerable {
     event InventorySet(address inventoryAddress);
+    event ContractInformationSet(string name, string symbol, string uri);
     event TokenURISet(uint256 indexed tokenId, address indexed changer, string uri);
     event TokenValiditySet(uint256 indexed tokenId, address indexed changer, bool valid);
 
@@ -68,7 +69,7 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Enumerable).interfaceId || interfaceId == type(IERC721Metadata).interfaceId;
     }
 
-    function init(address adminTerminusAddress, uint256 adminTerminusPoolId, uint256 characterCreationTerminusPoolId, string calldata contractName, string calldata contractSymbol) external {
+    function init(address adminTerminusAddress, uint256 adminTerminusPoolId, uint256 characterCreationTerminusPoolId, string calldata contractName, string calldata contractSymbol, string calldata contractUri) public {
         LibDiamond.enforceIsContractOwner();
 
         LibCharacters.CharactersStorage storage cs = LibCharacters.charactersStorage();
@@ -77,6 +78,9 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         cs.CharacterCreationTerminusPoolID = characterCreationTerminusPoolId;
         cs.ContractName = contractName;
         cs.ContractSymbol = contractSymbol;
+        cs.ContractURI = contractUri;
+
+        emit ContractInformationSet(cs.ContractName, cs.ContractSymbol, cs.ContractURI);
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         ds.supportedInterfaces[type(IERC721).interfaceId] = true;
@@ -91,6 +95,17 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         cs.InventoryAddress = inventoryAddress;
 
         emit InventorySet(inventoryAddress);
+    }
+
+    function setContractInformation(string calldata contractName, string calldata contractSymbol, string calldata contractUri) external {
+        LibDiamond.enforceIsContractOwner();
+
+        LibCharacters.CharactersStorage storage cs = LibCharacters.charactersStorage();
+        cs.ContractName = contractName;
+        cs.ContractSymbol = contractSymbol;
+        cs.ContractURI = contractUri;
+
+        emit ContractInformationSet(cs.ContractName, cs.ContractSymbol, cs.ContractURI);
     }
 
     function name() external view returns (string memory) {
@@ -113,13 +128,13 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         emit TokenURISet(tokenId, msg.sender, uri);
     }
 
-    function isMetadataInvalid(uint256 tokenId) external view returns (bool) {
-        return LibCharacters.charactersStorage().MetadataInvalid[tokenId];
+    function isMetadataValid(uint256 tokenId) external view returns (bool) {
+        return LibCharacters.charactersStorage().MetadataValid[tokenId];
     }
 
     function setMetadataValidity(uint256 tokenId, bool valid) external onlyGameMaster {
         LibCharacters.CharactersStorage storage cs = LibCharacters.charactersStorage();
-        cs.MetadataInvalid[tokenId] = valid;
+        cs.MetadataValid[tokenId] = valid;
         emit TokenValiditySet(tokenId, msg.sender, valid);
     }
 
