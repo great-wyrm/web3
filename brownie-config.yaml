@@ -1,0 +1,12 @@
+dependencies:
+  - "bugout-dev/dao@0.0.7"
+  - "OpenZeppelin/openzeppelin-contracts@4.3.2"
+  - "solidstate-network/solidstate-solidity@0.0.52"
+
+compiler:
+  solc:
+    remappings:
+      - "@moonstream=bugout-dev/dao@0.0.7"
+      - "@openzeppelin-contracts=OpenZeppelin/openzeppelin-contracts@4.4.0"
+      - "@openzeppelin/contracts=OpenZeppelin/openzeppelin-contracts@4.4.0"
+      - "@solidstate=solidstate-network/solidstate-solidity@0.0.52"
