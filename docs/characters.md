@@ -113,3 +113,5 @@ The method that players use to set metadata URIs on the Great Wyrm character con
 argument (`cc0Consent`) that they have to explicitly set to `true` else the transaction will fail. This
 is how we will represent players' consent to release their content to the Great Wyrm community under
 CC0.
+
+## Deploying and interacting with a Great Wyrm Character contract
