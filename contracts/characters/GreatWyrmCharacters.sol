@@ -32,6 +32,9 @@ library LibCharacters {
         mapping(uint256 => bool) MetadataValid;
     }
 
+    /**
+    Loads the DELEGATECALL-compliant storage structure for LibCharacters.
+     */
     function charactersStorage()
         internal
         pure
@@ -48,19 +51,25 @@ library LibCharacters {
 CharactersFacet contains all the characters in the universe of Great Wyrm.
  */
 contract CharactersFacet is ERC721Base, ERC721Enumerable {
+    /// InventorySet is fired every time the inventory address changes on the character contract.
     event InventorySet(address inventoryAddress);
+    /// ContractInformationSet is fired every time the name, symbol, or contract metadata URI are
+    /// changed on the character contract.
     event ContractInformationSet(string name, string symbol, string uri);
+    /// TokenURISet is fired every time a player changes the metadata URI for one of their characters.
     event TokenURISet(
         uint256 indexed tokenId,
         address indexed changer,
         string uri
     );
+    /// TokenValiditySet is fired every time a game master marks a token's metadata as valid or invalid.
     event TokenValiditySet(
         uint256 indexed tokenId,
         address indexed changer,
         bool valid
     );
 
+    /// onlyGameMaster modifies functions that can only be called by game masters.
     modifier onlyGameMaster() {
         LibCharacters.CharactersStorage storage cs = LibCharacters
             .charactersStorage();
@@ -75,6 +84,8 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         _;
     }
 
+    /// onlyPlayerOf modifies functions that apply to a specific character and enforces that those functions
+    /// are only being called by a sender which currently controls that character.
     modifier onlyPlayerOf(uint256 tokenId) {
         require(
             msg.sender == _ownerOf(tokenId),
@@ -83,6 +94,8 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         _;
     }
 
+    /// supportsInterface is implemented here for deployment of the characters contract as a standalone,
+    /// immutable contract. In an EIP-2535 setup, this should be served via the DiamondLoupeFacet.
     function supportsInterface(bytes4 interfaceId)
         external
         pure
@@ -94,6 +107,15 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
             interfaceId == type(IERC721Metadata).interfaceId;
     }
 
+    /// Initializes a character contract by specifying:
+    /// 1. An address for a Terminus contract on which the access control badges will be defined.
+    /// 2. The pool ID for the game master pool on the Terminus contract specified in (1).
+    /// 3. The pool ID for the Terminus pool on the Terminus contract specified in (1) from which tokens are
+    ///    required in order to create new Great Wyrm characters. This requirement helps ensure that
+    ///    someone doesn't just create characters on an infinite loop and overpopulate the world.
+    /// 4. A name for the contract.
+    /// 5. A symbol for the contract.
+    /// 6. A metadata URI for the contract.
     function init(
         address adminTerminusAddress,
         uint256 adminTerminusPoolId,
@@ -125,6 +147,11 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         ds.supportedInterfaces[type(IERC721Metadata).interfaceId] = true;
     }
 
+    /// setInventory allows the owner of the character contract to set the address of the Inventory
+    /// contract it uses.
+    /// For more information about Inventory:
+    /// 1. Source code: https://github.com/G7DAO/contracts/blob/cafd8ed8bfbb61d3eff3ce5b21da77063d2592df/contracts/inventory/Inventory.sol
+    /// 2. Design document: https://docs.google.com/document/d/1Oa9I9b7t46_ngYp-Pady5XKEDW8M2NE9rI0GBRACZBI/edit?usp=sharing
     function setInventory(address inventoryAddress) external {
         LibDiamond.enforceIsContractOwner();
 
@@ -135,10 +162,12 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         emit InventorySet(inventoryAddress);
     }
 
+    /// Returns the address of the Inventory contract (if any) that the character contract is using.
     function inventory() external view returns (address) {
         return LibCharacters.charactersStorage().InventoryAddress;
     }
 
+    /// Allows contract owner to modify contract name, symbol, or metadata URI.
     function setContractInformation(
         string calldata contractName,
         string calldata contractSymbol,
@@ -159,22 +188,30 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         );
     }
 
+    /// Returns the contract name.
     function name() external view returns (string memory) {
         return LibCharacters.charactersStorage().ContractName;
     }
 
+    /// Returns the contract symbol.
     function symbol() external view returns (string memory) {
         return LibCharacters.charactersStorage().ContractSymbol;
     }
 
+    /// Returns the contract metadata URI.
     function contractURI() external view returns (string memory) {
         return LibCharacters.charactersStorage().ContractURI;
     }
 
+    /// Returns the metadata URI for a given character (specified by tokenId). This metadata at this
+    /// URI represents the character's profile in the Great Wyrm game.
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         return LibCharacters.charactersStorage().TokenURIs[tokenId];
     }
 
+    /// Allows a player to set the metadata URI for one of their characters.
+    /// The `isAppropriatelyLicensed` argument is a certification from the player that the content at
+    /// the metadata URI may be used by the Great Wyrm community under a CC0 license.
     function setTokenUri(
         uint256 tokenId,
         string calldata uri,
@@ -193,10 +230,12 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         // We do not emit a TokenValiditySet event - that is reserved for Game Masters.
     }
 
+    /// Checks if the metadata for a given character is valid according to the game masters of Great Wyrm.
     function isMetadataValid(uint256 tokenId) external view returns (bool) {
         return LibCharacters.charactersStorage().MetadataValid[tokenId];
     }
 
+    /// Allows game masters to mark a character's metadata as being valid or invalid.
     function setMetadataValidity(uint256 tokenId, bool valid)
         external
         onlyGameMaster
@@ -207,6 +246,8 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         emit TokenValiditySet(tokenId, msg.sender, valid);
     }
 
+    /// Allows anyone possessing a character creation Terminus token to create a Greaty Wyrm character.
+    /// The character creation Terminus token is used up in the process.
     function createCharacter(address player) external returns (uint256) {
         LibCharacters.CharactersStorage storage cs = LibCharacters
             .charactersStorage();
