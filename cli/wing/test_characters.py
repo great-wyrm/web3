@@ -103,7 +103,7 @@ class CharacterCreationTests(CharactersTestCase):
         )
 
         with self.assertRaises(VirtualMachineError):
-            self.characters.mint(
+            self.characters.create_character(
                 self.random_person.address, {"from": self.random_person}
             )
 
@@ -120,7 +120,7 @@ class CharacterCreationTests(CharactersTestCase):
         )
 
         with self.assertRaises(VirtualMachineError):
-            self.characters.mint(self.admin.address, {"from": self.admin})
+            self.characters.create_character(self.admin.address, {"from": self.admin})
 
         self.assertEqual(self.characters.total_supply(), 0)
 
@@ -140,7 +140,7 @@ class CharacterCreationTests(CharactersTestCase):
         )
         player_character_balance_0 = self.characters.balance_of(self.player.address)
 
-        self.characters.mint(self.player.address, {"from": self.player})
+        self.characters.create_character(self.player.address, {"from": self.player})
 
         total_supply_1 = self.characters.total_supply()
         character_creation_token_balance_1 = self.terminus.balance_of(
@@ -171,7 +171,7 @@ class CharacterCreationTests(CharactersTestCase):
         player_character_balance_0 = self.characters.balance_of(self.player.address)
         random_person_character_balance_0 = self.characters.balance_of(self.random_person.address)
 
-        self.characters.mint(self.random_person.address, {"from": self.player})
+        self.characters.create_character(self.random_person.address, {"from": self.player})
 
         total_supply_1 = self.characters.total_supply()
         character_creation_token_balance_1 = self.terminus.balance_of(

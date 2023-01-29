@@ -146,7 +146,7 @@ contract CharactersFacet is ERC721Base, ERC721Enumerable {
         emit TokenValiditySet(tokenId, msg.sender, valid);
     }
 
-    function mint(address player) external returns (uint256) {
+    function createCharacter(address player) external returns (uint256) {
         LibCharacters.CharactersStorage storage cs = LibCharacters.charactersStorage();
         ITerminus adminTerminusContract = ITerminus(cs.AdminTerminusAddress);
         adminTerminusContract.burn(msg.sender, cs.CharacterCreationTerminusPoolID, 1);

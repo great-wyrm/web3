@@ -21,7 +21,7 @@ URI for that token.
 A token's owner may elect to include offensive content in its metadata. For moderation purposes, the
 Great Wyrm ERC721 contract also allows moderators (accounts possessing a specific [Terminus](https://docs.moonstream.to/terminus/))
 badge to flag and unflag tokens for offensive content. The state of a token being flagged or unflagged
-will be readable from a separate view method on the contract (TODO(zomglings): `isFlagged`?).
+will be readable from a separate view method on the contract: `isMetadataValid`.
 
 ## Inventory
 
@@ -35,7 +35,7 @@ For more information about the Inventory contract, its purpose, and its uses, re
 [*An Inventory system for web3 games*](https://docs.google.com/document/d/1Oa9I9b7t46_ngYp-Pady5XKEDW8M2NE9rI0GBRACZBI/edit?usp=sharing).
 
 The Great Wyrm character contract will contain a reference to the inventory contract that it is being
-used with (TODO(zomglings): `inventoryAddress`?).
+used with. This information can be accessed using the `inventory` external view method.
 
 ## Upgradability using the EIP-2535 Diamond standard
 

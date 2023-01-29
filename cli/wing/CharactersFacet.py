@@ -114,6 +114,10 @@ class CharactersFacet:
         self.assert_contract_is_instantiated()
         return self.contract.contractURI.call(block_identifier=block_number)
 
+    def create_character(self, player: ChecksumAddress, transaction_config) -> Any:
+        self.assert_contract_is_instantiated()
+        return self.contract.createCharacter(player, transaction_config)
+
     def get_approved(
         self, token_id: int, block_number: Optional[Union[str, int]] = "latest"
     ) -> Any:
@@ -163,10 +167,6 @@ class CharactersFacet:
         return self.contract.isMetadataValid.call(
             token_id, block_identifier=block_number
         )
-
-    def mint(self, player: ChecksumAddress, transaction_config) -> Any:
-        self.assert_contract_is_instantiated()
-        return self.contract.mint(player, transaction_config)
 
     def name(self, block_number: Optional[Union[str, int]] = "latest") -> Any:
         self.assert_contract_is_instantiated()
@@ -405,6 +405,18 @@ def handle_contract_uri(args: argparse.Namespace) -> None:
     print(result)
 
 
+def handle_create_character(args: argparse.Namespace) -> None:
+    network.connect(args.network)
+    contract = CharactersFacet(args.address)
+    transaction_config = get_transaction_config(args)
+    result = contract.create_character(
+        player=args.player, transaction_config=transaction_config
+    )
+    print(result)
+    if args.verbose:
+        print(result.info())
+
+
 def handle_get_approved(args: argparse.Namespace) -> None:
     network.connect(args.network)
     contract = CharactersFacet(args.address)
@@ -455,16 +467,6 @@ def handle_is_metadata_valid(args: argparse.Namespace) -> None:
         token_id=args.token_id, block_number=args.block_number
     )
     print(result)
-
-
-def handle_mint(args: argparse.Namespace) -> None:
-    network.connect(args.network)
-    contract = CharactersFacet(args.address)
-    transaction_config = get_transaction_config(args)
-    result = contract.mint(player=args.player, transaction_config=transaction_config)
-    print(result)
-    if args.verbose:
-        print(result.info())
 
 
 def handle_name(args: argparse.Namespace) -> None:
@@ -674,6 +676,13 @@ def generate_cli() -> argparse.ArgumentParser:
     add_default_arguments(contract_uri_parser, False)
     contract_uri_parser.set_defaults(func=handle_contract_uri)
 
+    create_character_parser = subcommands.add_parser("create-character")
+    add_default_arguments(create_character_parser, True)
+    create_character_parser.add_argument(
+        "--player", required=True, help="Type: address"
+    )
+    create_character_parser.set_defaults(func=handle_create_character)
+
     get_approved_parser = subcommands.add_parser("get-approved")
     add_default_arguments(get_approved_parser, False)
     get_approved_parser.add_argument(
@@ -726,11 +735,6 @@ def generate_cli() -> argparse.ArgumentParser:
         "--token-id", required=True, help="Type: uint256", type=int
     )
     is_metadata_valid_parser.set_defaults(func=handle_is_metadata_valid)
-
-    mint_parser = subcommands.add_parser("mint")
-    add_default_arguments(mint_parser, True)
-    mint_parser.add_argument("--player", required=True, help="Type: address")
-    mint_parser.set_defaults(func=handle_mint)
 
     name_parser = subcommands.add_parser("name")
     add_default_arguments(name_parser, False)
