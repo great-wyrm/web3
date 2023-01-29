@@ -26,10 +26,8 @@ setup(
     author="Moonstream DAO",
     author_email="engineering@moonstream.to",
     classifiers=[
-        "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
-        "License :: OSI Approved :: Apache Software License",
-        "Topic :: Software Development :: Libraries",
+        "License :: OSI Approved :: MIT License",
     ],
     python_requires=">=3.6",
     entry_points={
