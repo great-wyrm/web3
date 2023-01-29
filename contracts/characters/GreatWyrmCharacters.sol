@@ -45,9 +45,9 @@ library LibCharacters {
 }
 
 /**
-GreatWyrmCharacters contains all the characters in the universe of Great Wyrm.
+CharactersFacet contains all the characters in the universe of Great Wyrm.
  */
-contract GreatWyrmCharacters is ERC721Base, ERC721Enumerable {
+contract CharactersFacet is ERC721Base, ERC721Enumerable {
     event InventorySet(address inventoryAddress);
     event TokenURISet(uint256 indexed tokenId, address indexed changer, string uri);
     event TokenValiditySet(uint256 indexed tokenId, address indexed changer, bool valid);
@@ -55,12 +55,12 @@ contract GreatWyrmCharacters is ERC721Base, ERC721Enumerable {
     modifier onlyGameMaster() {
         LibCharacters.CharactersStorage storage cs = LibCharacters.charactersStorage();
         ITerminus adminTerminusContract = ITerminus(cs.AdminTerminusAddress);
-        require(adminTerminusContract.balanceOf(msg.sender, cs.AdminTerminusPoolID) >= 1, "GreatWyrmCharacters.onlyGameMaster: Message sender is not a game master");
+        require(adminTerminusContract.balanceOf(msg.sender, cs.AdminTerminusPoolID) >= 1, "CharactersFacet.onlyGameMaster: Message sender is not a game master");
         _;
     }
 
     modifier onlyPlayerOf(uint256 tokenId) {
-        require(msg.sender == _ownerOf(tokenId), "GreatWyrmCharacters.onlyPlayerOf: Message sender does not control the given character");
+        require(msg.sender == _ownerOf(tokenId), "CharactersFacet.onlyPlayerOf: Message sender does not control the given character");
         _;
     }
 
@@ -106,7 +106,7 @@ contract GreatWyrmCharacters is ERC721Base, ERC721Enumerable {
     }
 
     function setTokenUri(uint256 tokenId, string calldata uri, bool isAppropriatelyLicensed) external onlyPlayerOf(tokenId) {
-        require(isAppropriatelyLicensed, "GreatWyrmCharacters.setTokenUri: Please set the last parameter to this function to true, to certify that the content at that URI is appropriately licensed.");
+        require(isAppropriatelyLicensed, "CharactersFacet.setTokenUri: Please set the last parameter to this function to true, to certify that the content at that URI is appropriately licensed.");
         LibCharacters.CharactersStorage storage cs = LibCharacters.charactersStorage();
         cs.TokenURIs[tokenId] = uri;
 
