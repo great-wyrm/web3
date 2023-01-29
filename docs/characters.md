@@ -110,8 +110,107 @@ This will ensure that the Great Wyrm community can build the game world without 
 lawsuits tainting the magic of our shared creation.
 
 The method that players use to set metadata URIs on the Great Wyrm character contract will take a boolean
-argument (`cc0Consent`) that they have to explicitly set to `true` else the transaction will fail. This
-is how we will represent players' consent to release their content to the Great Wyrm community under
+argument (`isAppropriatelyLicensed`) that they have to explicitly set to `true` else the transaction will fail.
+This is how we will represent players' consent to release their content to the Great Wyrm community under
 CC0.
 
 ## Deploying and interacting with a Great Wyrm Character contract
+
+You can deploy a character contract as an EIP-2535 upgradable proxy contract to any chain that supports
+the Ethereum JSONRPC API using the `wing` command-line tool. The command to invoke is: `wing core characters-gogogo`.
+
+```
+$ wing core characters-gogogo -h
+
+usage: wing characters-gogogo [-h] --network NETWORK [--address ADDRESS]
+                              --sender SENDER [--password PASSWORD]
+                              [--gas-price GAS_PRICE]
+                              [--max-fee-per-gas MAX_FEE_PER_GAS]
+                              [--max-priority-fee-per-gas MAX_PRIORITY_FEE_PER_GAS]
+                              [--confirmations CONFIRMATIONS] [--nonce NONCE]
+                              [--value VALUE] [--verbose]
+                              --admin-terminus-address ADMIN_TERMINUS_ADDRESS
+                              --admin-terminus-pool-id ADMIN_TERMINUS_POOL_ID
+                              --character-creation-terminus-pool-id
+                              CHARACTER_CREATION_TERMINUS_POOL_ID
+                              [--name NAME] [--symbol SYMBOL]
+                              [--diamond-cut-address DIAMOND_CUT_ADDRESS]
+                              [--diamond-address DIAMOND_ADDRESS]
+                              [--diamond-loupe-address DIAMOND_LOUPE_ADDRESS]
+                              [--ownership-address OWNERSHIP_ADDRESS]
+                              [--characters-facet-address CHARACTERS_FACET_ADDRESS]
+                              [-o OUTFILE]
+
+Deploy characters diamond contract
+
+options:
+  -h, --help            show this help message and exit
+  --network NETWORK     Name of brownie network to connect to
+  --address ADDRESS     Address of deployed contract to connect to
+  --sender SENDER       Path to keystore file for transaction sender
+  --password PASSWORD   Password to keystore file (if you do not provide it,
+                        you will be prompted for it)
+  --gas-price GAS_PRICE
+                        Gas price at which to submit transaction
+  --max-fee-per-gas MAX_FEE_PER_GAS
+                        Max fee per gas for EIP1559 transactions
+  --max-priority-fee-per-gas MAX_PRIORITY_FEE_PER_GAS
+                        Max priority fee per gas for EIP1559 transactions
+  --confirmations CONFIRMATIONS
+                        Number of confirmations to await before considering a
+                        transaction completed
+  --nonce NONCE         Nonce for the transaction (optional)
+  --value VALUE         Value of the transaction in wei(optional)
+  --verbose             Print verbose output
+  --admin-terminus-address ADMIN_TERMINUS_ADDRESS
+                        Address of Terminus contract defining access control
+                        for this Great Wyrm Characters contract
+  --admin-terminus-pool-id ADMIN_TERMINUS_POOL_ID
+                        Pool ID of Terminus pool for administrators of this
+                        Great Wyrm Characters contract
+  --character-creation-terminus-pool-id CHARACTER_CREATION_TERMINUS_POOL_ID
+                        Pool ID of Terminus pool that allows players to create
+                        characters on this Great Wyrm Characters contract
+  --name NAME           Name for this Great Wyrm Characters contract
+  --symbol SYMBOL       Symbol for this Great Wyrm Characters contract
+  --diamond-cut-address DIAMOND_CUT_ADDRESS
+                        Address to deployed DiamondCutFacet. If provided, this
+                        command skips deployment of a new DiamondCutFacet.
+  --diamond-address DIAMOND_ADDRESS
+                        Address to deployed Diamond contract. If provided,
+                        this command skips deployment of a new Diamond
+                        contract and simply mounts the required facets onto
+                        the existing Diamond contract. Assumes that there is
+                        no collision of selectors.
+  --diamond-loupe-address DIAMOND_LOUPE_ADDRESS
+                        Address to deployed DiamondLoupeFacet. If provided,
+                        this command skips deployment of a new
+                        DiamondLoupeFacet. It mounts the existing
+                        DiamondLoupeFacet onto the Diamond.
+  --ownership-address OWNERSHIP_ADDRESS
+                        Address to deployed OwnershipFacet. If provided, this
+                        command skips deployment of a new OwnershipFacet. It
+                        mounts the existing OwnershipFacet onto the Diamond.
+  --characters-facet-address CHARACTERS_FACET_ADDRESS
+                        Address to deployed CharactersFacet. If provided, this
+                        command skips deployment of a new charactersFacet. It
+                        mounts the existing charactersFacet onto the Diamond.
+  -o OUTFILE, --outfile OUTFILE
+                        (Optional) file to write deployed addresses to
+```
+
+You can interact with a depployed Great Wyrm characters contract using the `wing characters` subcommands:
+
+```
+$ wing characters -h
+
+usage: wing characters [-h]
+                       {deploy,verify-contract,approve,balance-of,contract-uri,create-character,get-approved,init,inventory,is-approved-for-all,is-metadata-valid,name,owner-of,safe-transfer-from-0x42842e0e,safe-transfer-from-0xb88d4fde,set-approval-for-all,set-contract-information,set-inventory,set-metadata-validity,set-token-uri,supports-interface,symbol,token-by-index,token-of-owner-by-index,token-uri,total-supply,transfer-from}
+                       ...
+
+positional arguments:
+  {deploy,verify-contract,approve,balance-of,contract-uri,create-character,get-approved,init,inventory,is-approved-for-all,is-metadata-valid,name,owner-of,safe-transfer-from-0x42842e0e,safe-transfer-from-0xb88d4fde,set-approval-for-all,set-contract-information,set-inventory,set-metadata-validity,set-token-uri,supports-interface,symbol,token-by-index,token-of-owner-by-index,token-uri,total-supply,transfer-from}
+
+options:
+  -h, --help            show this help message and exit
+```

@@ -1,0 +1,44 @@
+name: Great Wyrm Characters tests
+
+on:
+  pull_request:
+    paths:
+      - "cli/wing/CharactersFacet.py"
+      - "cli/wing/Diamond*"
+      - "cli/wing/OwnershipFacet.py"
+      - "cli/wing/test_characters.py"
+      - "contracts/characters/**"
+      - "contracts/diamond/**"
+      - "contracts/interfaces/ITerminus.sol"
+      - "contracts/mock/**"
+      - ".github/workflows/characters.test.yml"
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Install ganache
+        run: npm install -g ganache-cli
+      - name: Upgrade pip
+        env:
+          BROWNIE_LIB: 1
+        run: pip install -U pip
+      - name: Install dependencies for CLI
+        working-directory: cli/
+        env:
+          BROWNIE_LIB: 1
+        run: |
+          pip install -e ".[dev]"
+      - name: Compile smart contracts
+        run: brownie compile
+      - name: Run tests
+        working-directory: cli/
+        run: bash test.sh wing.test_characters
