@@ -369,6 +369,7 @@ def handle_characters_gogogo(args: argparse.Namespace) -> None:
         character_creation_terminus_pool_id=args.character_creation_terminus_pool_id,
         contract_name=args.name,
         contract_symbol=args.symbol,
+        contract_uri=args.uri,
         transaction_config=transaction_config,
         diamond_cut_address=args.diamond_cut_address,
         diamond_address=args.diamond_address,
@@ -473,6 +474,12 @@ def generate_cli():
         required=False,
         default="WYRM",
         help="Symbol for this Great Wyrm Characters contract",
+    )
+    characters_gogogo_parser.add_argument(
+        "--uri",
+        required=False,
+        default="",
+        help="Contract URI for Great Wyrm Characters contract being deployed",
     )
     characters_gogogo_parser.add_argument(
         "--diamond-cut-address",
