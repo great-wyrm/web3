@@ -16,7 +16,7 @@ setup(
     name="wing",
     version=VERSION,
     packages=find_packages(),
-    install_requires=["eth-brownie", "inspector-facet", "moonworm", "tqdm"],
+    install_requires=["eth-brownie", "inspector-facet", "moonworm>=0.6.0", "tqdm"],
     extras_require={
         "dev": ["black", "isort"],
     },
